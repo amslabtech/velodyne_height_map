@@ -105,6 +105,7 @@ void HeightMap::constructFullClouds(const VPointCloud::ConstPtr &scan,
         clear_cloud_.points[empty_count].y = scan->points[i].y;
         clear_cloud_.points[empty_count].z = scan->points[i].z;
         //clear_cloud_.channels[0].values[empty_count] = (float) scan->points[i].intensity;
+        clear_cloud_.points[empty_count].intensity = (float) scan->points[i].intensity;
         empty_count++;
       }
     }
