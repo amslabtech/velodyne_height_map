@@ -98,6 +98,7 @@ void HeightMap::constructFullClouds(const VPointCloud::ConstPtr &scan,
         obstacle_cloud_.points[obs_count].y = scan->points[i].y;
         obstacle_cloud_.points[obs_count].z = scan->points[i].z;
         //obstacle_cloud_.channels[0].values[obs_count] = (float) scan->points[i].intensity;
+        obstacle_cloud_.points[obs_count].intensity = (float) scan->points[i].intensity;
         obs_count++;
       } else {
         clear_cloud_.points[empty_count].x = scan->points[i].x;
