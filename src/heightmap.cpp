@@ -1,8 +1,8 @@
 /*  Copyright (C) 2010 UT-Austin &  Austin Robot Technology,
  *  David Claridge, Michael Quinlan
  *  Copyright (C) 2012 Jack O'Quin
- * 
- *  License: Modified BSD Software License 
+ *
+ *  License: Modified BSD Software License
  */
 
 /** @file
@@ -26,7 +26,7 @@ Publishes:
   obstacles
 
 
-@author David Claridge, Michael Quinlan 
+@author David Claridge, Michael Quinlan
 
 */
 
@@ -44,16 +44,16 @@ HeightMap::HeightMap(ros::NodeHandle node, ros::NodeHandle priv_nh)
   priv_nh.param("full_clouds", full_clouds_, false);
   priv_nh.param("grid_dimensions", grid_dim_, 320);
   priv_nh.param("height_threshold", height_diff_threshold_, 0.25);
-  
+
   ROS_INFO_STREAM("height map parameters: "
                   << grid_dim_ << "x" << grid_dim_ << ", "
                   << m_per_cell_ << "m cells, "
                   << height_diff_threshold_ << "m threshold, "
                   << (full_clouds_? "": "not ") << "publishing full clouds");
 
-  // Set up publishers  
+  // Set up publishers
   obstacle_publisher_ = node.advertise<VPointCloud>("velodyne_obstacles",1);
-  clear_publisher_ = node.advertise<VPointCloud>("velodyne_clear",1);  
+  clear_publisher_ = node.advertise<VPointCloud>("velodyne_clear",1);
 
   // subscribe to Velodyne data points
   velodyne_scan_ = node.subscribe("velodyne_points", 10,
@@ -71,7 +71,7 @@ void HeightMap::constructFullClouds(const VPointCloud::ConstPtr &scan,
   float max[grid_dim_][grid_dim_];
   bool init[grid_dim_][grid_dim_];
   memset(&init, 0, grid_dim_*grid_dim_);
-  
+
   // build height map
   for (unsigned i = 0; i < npoints; ++i) {
     int x = ((grid_dim_/2)+scan->points[i].x/m_per_cell_);
@@ -93,19 +93,21 @@ void HeightMap::constructFullClouds(const VPointCloud::ConstPtr &scan,
     int x = ((grid_dim_/2)+scan->points[i].x/m_per_cell_);
     int y = ((grid_dim_/2)+scan->points[i].y/m_per_cell_);
     if (x >= 0 && x < grid_dim_ && y >= 0 && y < grid_dim_ && init[x][y]) {
-      if ((max[x][y] - min[x][y] > height_diff_threshold_) ) {   
-        obstacle_cloud_.points[obs_count].x = scan->points[i].x;
-        obstacle_cloud_.points[obs_count].y = scan->points[i].y;
-        obstacle_cloud_.points[obs_count].z = scan->points[i].z;
-        //obstacle_cloud_.channels[0].values[obs_count] = (float) scan->points[i].intensity;
-        obstacle_cloud_.points[obs_count].intensity = (float) scan->points[i].intensity;
+      if ((max[x][y] - min[x][y] > height_diff_threshold_) ) {
+        // obstacle_cloud_.points[obs_count].x = scan->points[i].x;
+        // obstacle_cloud_.points[obs_count].y = scan->points[i].y;
+        // obstacle_cloud_.points[obs_count].z = scan->points[i].z;
+        // //obstacle_cloud_.channels[0].values[obs_count] = (float) scan->points[i].intensity;
+        // obstacle_cloud_.points[obs_count].intensity = (float) scan->points[i].intensity;
+        obstacle_cloud_.points[obs_count] = scan->points[i];
         obs_count++;
       } else {
-        clear_cloud_.points[empty_count].x = scan->points[i].x;
-        clear_cloud_.points[empty_count].y = scan->points[i].y;
-        clear_cloud_.points[empty_count].z = scan->points[i].z;
-        //clear_cloud_.channels[0].values[empty_count] = (float) scan->points[i].intensity;
-        clear_cloud_.points[empty_count].intensity = (float) scan->points[i].intensity;
+        // clear_cloud_.points[empty_count].x = scan->points[i].x;
+        // clear_cloud_.points[empty_count].y = scan->points[i].y;
+        // clear_cloud_.points[empty_count].z = scan->points[i].z;
+        // //clear_cloud_.channels[0].values[empty_count] = (float) scan->points[i].intensity;
+        // clear_cloud_.points[empty_count].intensity = (float) scan->points[i].intensity;
+        clear_cloud_.points[obs_count] = scan->points[i];
         empty_count++;
       }
     }
@@ -123,7 +125,7 @@ void HeightMap::constructGridClouds(const VPointCloud::ConstPtr &scan,
   bool init[grid_dim_][grid_dim_];
 
   //memset(&init, 0, grid_dim_*grid_dim_);
-  
+
   for (int x = 0; x < grid_dim_; x++) {
     for (int y = 0; y < grid_dim_; y++) {
       init[x][y]=false;
@@ -155,7 +157,7 @@ void HeightMap::constructGridClouds(const VPointCloud::ConstPtr &scan,
     int x = ((grid_dim_/2)+scan->points[i].x/m_per_cell_);
     int y = ((grid_dim_/2)+scan->points[i].y/m_per_cell_);
     if (x >= 0 && x < grid_dim_ && y >= 0 && y < grid_dim_ && init[x][y]) {
-      if ((max[x][y] - min[x][y] > height_diff_threshold_) ) {  
+      if ((max[x][y] - min[x][y] > height_diff_threshold_) ) {
         num_obs[x][y]++;
       } else {
         num_clear[x][y]++;
@@ -192,7 +194,7 @@ void HeightMap::processData(const VPointCloud::ConstPtr &scan)
   if ((obstacle_publisher_.getNumSubscribers() == 0)
       && (clear_publisher_.getNumSubscribers() == 0))
     return;
-  
+
   // pass along original time stamp and frame ID
   obstacle_cloud_.header.stamp = scan->header.stamp;
   obstacle_cloud_.header.frame_id = scan->header.frame_id;
@@ -217,13 +219,13 @@ void HeightMap::processData(const VPointCloud::ConstPtr &scan)
     constructFullClouds(scan,npoints,obs_count, empty_count);
   else
     constructGridClouds(scan,npoints,obs_count, empty_count);
-  
+
   obstacle_cloud_.points.resize(obs_count);
   //obstacle_cloud_.channels[0].values.resize(obs_count);
 
   clear_cloud_.points.resize(empty_count);
   //clear_cloud_.channels[0].values.resize(empty_count);
-  
+
   if (obstacle_publisher_.getNumSubscribers() > 0)
     obstacle_publisher_.publish(obstacle_cloud_);
 

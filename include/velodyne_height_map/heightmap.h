@@ -1,8 +1,8 @@
 /* -*- mode: C++ -*- */
 /*  Copyright (C) 2010 UT-Austin & Austin Robot Technology,
  *  David Claridge, Michael Quinlan
- * 
- *  License: Modified BSD Software License 
+ *
+ *  License: Modified BSD Software License
  */
 
 
@@ -15,7 +15,7 @@
 namespace velodyne_height_map {
 
 // shorter names for point cloud types in this namespace
-typedef pcl::PointXYZI VPoint;
+typedef pcl::PointXYZINormal VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
 
 class HeightMap
@@ -53,8 +53,8 @@ private:
   bool full_clouds_;
 
   // Point clouds generated in processData
-  VPointCloud obstacle_cloud_;            
-  VPointCloud clear_cloud_;            
+  VPointCloud obstacle_cloud_;
+  VPointCloud clear_cloud_;
 
   // ROS topics
   ros::Subscriber velodyne_scan_;
