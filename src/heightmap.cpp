@@ -94,19 +94,9 @@ void HeightMap::constructFullClouds(const VPointCloud::ConstPtr &scan,
     int y = ((grid_dim_/2)+scan->points[i].y/m_per_cell_);
     if (x >= 0 && x < grid_dim_ && y >= 0 && y < grid_dim_ && init[x][y]) {
       if ((max[x][y] - min[x][y] > height_diff_threshold_) ) {
-        // obstacle_cloud_.points[obs_count].x = scan->points[i].x;
-        // obstacle_cloud_.points[obs_count].y = scan->points[i].y;
-        // obstacle_cloud_.points[obs_count].z = scan->points[i].z;
-        // //obstacle_cloud_.channels[0].values[obs_count] = (float) scan->points[i].intensity;
-        // obstacle_cloud_.points[obs_count].intensity = (float) scan->points[i].intensity;
         obstacle_cloud_.points[obs_count] = scan->points[i];
         obs_count++;
       } else {
-        // clear_cloud_.points[empty_count].x = scan->points[i].x;
-        // clear_cloud_.points[empty_count].y = scan->points[i].y;
-        // clear_cloud_.points[empty_count].z = scan->points[i].z;
-        // //clear_cloud_.channels[0].values[empty_count] = (float) scan->points[i].intensity;
-        // clear_cloud_.points[empty_count].intensity = (float) scan->points[i].intensity;
         clear_cloud_.points[empty_count] = scan->points[i];
         empty_count++;
       }
